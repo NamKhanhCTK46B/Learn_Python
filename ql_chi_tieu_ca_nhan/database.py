@@ -19,6 +19,14 @@ def connect_db():
     conn.commit()
     return conn
 
+def get_all_expenses():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM expenses")
+    data = cursor.fetchall()
+    conn.close()
+    return data
+
 def add_expense(date, category, amount, exp_type):
     conn = connect_db()
     cursor = conn.cursor()
@@ -63,6 +71,25 @@ def get_expenses_summary(filter_type="all"):
             FROM expenses
             GROUP BY date
         """)
+
+    data = cursor.fetchall()
+    conn.close()
+    return data
+
+def get_filtered_expenses(from_date, to_date, exp_type):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    if exp_type == "Tất cả":
+        cursor.execute("""
+            SELECT * FROM expenses
+            WHERE date BETWEEN ? AND ?
+        """, (from_date, to_date))
+    else:
+        cursor.execute("""
+            SELECT * FROM expenses
+            WHERE date BETWEEN ? AND ? AND type = ?
+        """, (from_date, to_date, exp_type))
 
     data = cursor.fetchall()
     conn.close()
